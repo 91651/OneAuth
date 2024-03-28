@@ -9,6 +9,8 @@ using OneAuth.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
@@ -30,26 +32,21 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<OneAuthDbContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddIdentityCore<ApplicationUser>(options => {
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+})
     .AddEntityFrameworkStores<OneAuthDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddIdentityServer()
-                .AddInMemoryClients(new Client[] {
-                    new Client
-                    {
-                        ClientId = "client",
-                        AllowedGrantTypes = GrantTypes.ImplicitAndClientCredentials,
-                        ClientSecrets = new List<Secret> {new Secret("SuperSecretPassword".Sha256())},
-                        RedirectUris = { "https://localhost:5002/signin-oidc" },
-                        PostLogoutRedirectUris = { "https://localhost:5002/signout-callback-oidc" },
-                        FrontChannelLogoutUri = "https://localhost:5002/signout-oidc",
-                        AllowedScopes = { "openid", "profile", "email", "phone" },
+var a = builder.Configuration.GetSection("IdentityServer:Clients");
 
-
-                    }
-                })
+builder.Services.AddIdentityServer().AddInMemoryClients(builder.Configuration.GetSection("IdentityServer:Clients"))
                 .AddInMemoryIdentityResources(new IdentityResource[] {
                     new IdentityResources.OpenId(),
                     new IdentityResources.Profile(),
@@ -88,5 +85,6 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(OneAuth.UI._Imports).Assembly);
 
 app.MapAdditionalIdentityEndpoints();
+app.MapControllers();
 
 app.Run();
