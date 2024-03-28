@@ -4,7 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-OneAuth.Web-f4b51f08-2cac-4aac-a540-5bed537769c3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
