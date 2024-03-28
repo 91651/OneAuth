@@ -6,6 +6,7 @@ using OneAuth.UI.Pages;
 using OneAuth.Web.Components;
 using OneAuth.Web.Components.Account;
 using OneAuth.Web.Data;
+using OneAuth.Web.Data.Entities.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -32,7 +33,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<OneAuthDbContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => {
+builder.Services.AddIdentityCore<User>(options => {
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequiredLength = 6;
     options.Password.RequireDigit = false;
@@ -44,8 +45,6 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => {
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-var a = builder.Configuration.GetSection("IdentityServer:Clients");
-
 builder.Services.AddIdentityServer().AddInMemoryClients(builder.Configuration.GetSection("IdentityServer:Clients"))
                 .AddInMemoryIdentityResources(new IdentityResource[] {
                     new IdentityResources.OpenId(),
@@ -53,7 +52,7 @@ builder.Services.AddIdentityServer().AddInMemoryClients(builder.Configuration.Ge
                     new IdentityResources.Email(),
                     new IdentityResources.Phone(),
                 })
-                .AddAspNetIdentity<ApplicationUser>();
+                .AddAspNetIdentity<User>();
 
 
 var app = builder.Build();

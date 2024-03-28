@@ -1,7 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using OneAuth.Web.Data
+@using OneAuth.Web.Data.Entities.Identity
 
-@inject SignInManager<ApplicationUser> SignInManager
+@inject SignInManager<User> SignInManager
 
 <ul class="nav nav-pills flex-column">
     <li class="nav-item">

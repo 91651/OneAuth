@@ -2,7 +2,7 @@ using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 
-namespace Twos.Web.Controllers
+namespace OneAuth.Web.Controllers
 {
     [ApiController]
     [Route("[controller]")]
