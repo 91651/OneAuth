@@ -22,6 +22,12 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+    options.Secure = CookieSecurePolicy.None;
+});
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -72,7 +78,7 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-
+app.UseCookiePolicy();
 app.UseRouting();
 app.UseAntiforgery();
 app.UseIdentityServer();
