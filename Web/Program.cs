@@ -1,5 +1,8 @@
+using System;
 using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OneAuth.UI.Pages;
@@ -38,7 +41,10 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<OneAuthDbContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+});
 builder.Services.AddIdentityCore<User>(options => {
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequiredLength = 6;
@@ -73,6 +79,17 @@ else
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
+app.UseForwardedHeaders();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Headers.TryGetValue("X-Original-Port", out var port))
+    {
+        context.Request.Host = new HostString(context.Request.Host.Host, int.Parse(port.ToString()));
+    }
+    await next(context);
+});
+
 
 app.UseHttpsRedirection();
 
